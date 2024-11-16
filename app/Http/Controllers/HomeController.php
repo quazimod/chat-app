@@ -40,4 +40,14 @@ class HomeController extends Controller
 
         return $message;
     }
+
+    public function searchUsers(Request $request): Collection
+    {
+        $username = $request->query('query');
+
+        return User::where([
+            ['name', 'like', '%' . $username . '%'],
+            ['id', '!=', auth()->id()]
+        ])->get();
+    }
 }

@@ -22,6 +22,7 @@ Route::get('/dashboard', function () {
 Route::get('/messages', [HomeController::class, 'index'])->middleware(['auth', 'verified'])->name('messages');
 Route::get('/messages/{chat}', [HomeController::class, 'getChatMessages'])->middleware(['auth', 'verified'])->name('chat_messages');
 Route::post('/messages/{chat}', [HomeController::class, 'storeMessage'])->middleware(['auth', 'verified'])->name('store_message');
+Route::get('/search', [HomeController::class, 'searchUsers'])->middleware(['auth', 'verified'])->name('search_users');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

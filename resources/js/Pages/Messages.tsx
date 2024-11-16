@@ -1,7 +1,7 @@
 
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head } from '@inertiajs/react';
-import { ReactElement, ReactNode, useEffect, useState} from "react";
+import { FormEvent, ReactElement, ReactNode, useEffect, useState} from "react";
 import axios from "axios";
 
 type ChatType = {
@@ -21,29 +21,43 @@ type MessageType = {
     sender_id: number
 }
 
-export default function Messages({ chats, user_id } : { chats: ChatType[], user_id: number }): ReactNode {
+type SearchedUserType = {
+    name: string
+}
+
+export default function Messages({chats, user_id}: { chats: ChatType[], user_id: number }): ReactNode {
     const [activeChat, setActiveChat] = useState(1)
     const [messages, setMessages] = useState<MessageType[]>([])
     const [messageText, setMessageText] = useState<string>("")
+    const [searchedUsers, setSearchedUsers] = useState<SearchedUserType[]>([])
 
     useEffect(() => {
         axios.get(`/messages/${activeChat}`)
-            .then((res) => setMessages(res.data) )
+            .then((res) => setMessages(res.data))
     }, [activeChat]);
 
     const messagesEls: ReactElement[] = messages.map(message => {
         let messageStyle: string = "w-2/3 rounded-lg my-1"
         messageStyle = message.sender_id === user_id ? messageStyle + ' float-right bg-white' : messageStyle + ' float-left bg-green-300'
 
-        return (<div className={ messageStyle }>
+        return (<div className={messageStyle}>
             <p className="p-3">{message.message}</p>
         </div>)
     })
 
-    const sendMessage= () => {
-        axios.post(`/messages/${activeChat}`, { message: messageText })
+    const sendMessage = () => {
+        axios.post(`/messages/${activeChat}`, {message: messageText})
             // @ts-ignore
             .then(res => setMessages(prev => [...prev, res.data]))
+    }
+
+    const searchUsers = (e: FormEvent<HTMLInputElement>) => {
+        const query: string = e.currentTarget.value
+
+        query.length === 0 && setSearchedUsers([])
+
+        query.length > 2 && axios.get(`/search?query=${ query }`)
+            .then((res) => setSearchedUsers(res.data))
     }
 
     return (
@@ -57,7 +71,18 @@ export default function Messages({ chats, user_id } : { chats: ChatType[], user_
             <Head title="Messages" />
             <div className="flex flex-row gap-0 h-screen">
                 <div className="bg-white basis-1/3" >
-                    { chats && chats.map((chat : ChatType): ReactNode => (
+                    <input type="search" onInput={e => searchUsers(e)} placeholder="Search" className="w-3/4 rounded-full my-3 mx-auto block"/>
+                    { searchedUsers.length > 0 && (
+                        <div className="border-2 p-3">
+                            { searchedUsers.map(user => (
+                                <div className="flex items-center p-2">
+                                    <div className="w-14 h-14 bg-black rounded-full mr-3"></div>
+                                    <div>{user.name}</div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                    {chats && !searchedUsers.length && chats.map((chat: ChatType): ReactNode => (
                         <div className="flex flex-row py-3" key={ chat.id } onClick={ () => setActiveChat(chat.id)}>
                             <div className="h-14 w-14 rounded-full bg-black mr-2"></div>
                             <div className="bg-blue-300 grow flex-1 flex flex-col justify-center">
