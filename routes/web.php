@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
@@ -17,6 +18,10 @@ Route::get('/', function () {
 Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
+
+Route::get('/messages', [HomeController::class, 'index'])->middleware(['auth', 'verified'])->name('messages');
+Route::get('/messages/{chat}', [HomeController::class, 'getChatMessages'])->middleware(['auth', 'verified'])->name('chat_messages');
+Route::post('/messages/{chat}', [HomeController::class, 'storeMessage'])->middleware(['auth', 'verified'])->name('store_message');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
