@@ -21,7 +21,7 @@ class HomeController extends Controller
             $chat->messages = $chat->messages()->get();
         }
 
-        return Inertia::render('Messages', ['chats' => $chats, 'user_id' => $user->id]);
+        return Inertia::render('Messages', ['chats' => $chats, 'user' => $user]);
     }
 
     public function getChatMessages(Chat $chat): Collection
